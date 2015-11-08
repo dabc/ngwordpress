@@ -29,7 +29,7 @@
         $routeProvider
             .when('/', {
                 controller: 'homeController',
-                templateUrl: 'modules/homeTemplate.html'
+                templateUrl: 'modules/pages/home/homeTemplate.html'
             })
             .otherwise({
                 redirectTo: '/'

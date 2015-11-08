@@ -13,7 +13,7 @@
     }).directive('wpPage', function () {
         return {
             controller: 'wpPageController',
-            templateUrl: 'modules/common/directives/wpPageDirectiveTemplate.html',
+            templateUrl: 'modules/components/wp-page/wpPageDirectiveTemplate.html',
             restrict: 'E',
             scope: {
                 id: '=',

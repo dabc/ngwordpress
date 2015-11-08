@@ -1,7 +1,7 @@
 var gulp = require('gulp'),
     concat = require('gulp-concat'),
     connect = require('gulp-connect'),
-    mbf = require('main-bower-files'),
+    mainBowerFiles = require('main-bower-files'),
     less = require('gulp-less'),
     jshint = require('gulp-jshint'),
     karma = require('karma').server,
@@ -9,11 +9,11 @@ var gulp = require('gulp'),
     del = require('del'),
     uglify = require('gulp-uglify'),
     minifyCss = require('gulp-minify-css'),
-    rename = require('gulp-rename'),
+    gulpFilter = require('gulp-filter'),
     ngAnnotate = require('gulp-ng-annotate');
 
 var paths = {
-    styles: ['./app/stylesheets/*.less'],
+    styles: ['./app/less/**/*.less'],
     scripts: ['./app/modules/**/*.js', './app/scripts/**/*.js'],
     html: ['./app/modules/**/*.html'],
     tests: ['./tests/*.js']
@@ -26,18 +26,22 @@ gulp.task('clean', function () {
     ]);
 });
 
-// vendor scripts
-gulp.task('vendor-js', ['clean'], function () {
-    var jsRegex = (/.*\.js$/i);
-    return gulp.src(mbf({ filter: jsRegex }))
-        .pipe(concat('vendor.js'))
-        .pipe(gulp.dest('./build/scripts'));
-});
+// vendor scripts and css
+gulp.task('vendor', ['clean'], function () {
+    var jsFilter = gulpFilter('*.js', {restore: true});
+    var cssFilter = gulpFilter(['*.css','*.less'], {restore: true});
 
-// vendor css
-gulp.task('vendor-css', ['clean'], function () {
-    return gulp.src('./bower_components/**/*.min.css')
-        .pipe(concat('vendor.min.css'))
+    return gulp.src(mainBowerFiles())
+        // js
+        .pipe(jsFilter)
+        .pipe(concat('vendor.js'))
+        .pipe(gulp.dest('./build/scripts'))
+        .pipe(jsFilter.restore)
+
+        // css
+        .pipe(cssFilter)
+        .pipe(less())
+        .pipe(concat('vendor.css'))
         .pipe(gulp.dest('./build/stylesheets'));
 });
 
@@ -48,7 +52,7 @@ gulp.task('fontawesome', ['clean'], function () {
 });
 gulp.task('vendor-fonts', ['fontawesome']);
 
-gulp.task('vendor-build', ['vendor-js', 'vendor-css', 'vendor-fonts']);
+gulp.task('vendor-build', ['vendor', 'vendor-fonts']);
 
 // app
 var appJs = function () {
@@ -138,7 +142,7 @@ gulp.task('watch', ['connect'], function () {
 
 // build
 gulp.task('build', ['vendor-build', 'app-build', 'lint'], function () {
-    return gulp.src('app/index.html')
+    return gulp.src('index.html')
         .pipe(gulp.dest('build'));
 });
 
