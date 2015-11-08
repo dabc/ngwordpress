@@ -76,6 +76,7 @@ gulp.task('app-html-watch', appHtml);
 var appCss = function () {
     return gulp.src(paths.styles)
         .pipe(less())
+        .pipe(concat('app.css'))
         .pipe(connect.reload())
         .pipe(gulp.dest('./build/stylesheets'));
 };
@@ -142,7 +143,7 @@ gulp.task('watch', ['connect'], function () {
 
 // build
 gulp.task('build', ['vendor-build', 'app-build', 'lint'], function () {
-    return gulp.src('index.html')
+    return gulp.src('app/index.html')
         .pipe(gulp.dest('build'));
 });
 
