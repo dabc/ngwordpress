@@ -13,7 +13,7 @@ var gulp = require('gulp'),
     ngAnnotate = require('gulp-ng-annotate');
 
 var paths = {
-    styles: ['./app/less/**/*.less'],
+    styles: ['./app/less/**/*.less','!./app/less/variables/bootstrap-overrides.less'],
     scripts: ['./app/modules/**/*.js', './app/scripts/**/*.js'],
     html: ['./app/modules/**/*.html'],
     tests: ['./tests/*.js']
@@ -26,21 +26,69 @@ gulp.task('clean', function () {
     ]);
 });
 
+gulp.task('clean-tmp', ['vendor-build'], function () {
+    return del([
+        './.tmp'
+    ]);
+});
+
 // vendor scripts and css
-gulp.task('vendor', ['clean'], function () {
+gulp.task('bower', ['clean'], function () {
     var jsFilter = gulpFilter('*.js', {restore: true});
     var cssFilter = gulpFilter(['*.css','*.less'], {restore: true});
+    var imageFilter = gulpFilter(['*.jpg','*.png'], {restore: true});
 
     return gulp.src(mainBowerFiles())
         // js
         .pipe(jsFilter)
+        .pipe(sourcemaps.init())
         .pipe(concat('vendor.js'))
+        .pipe(sourcemaps.write())
         .pipe(gulp.dest('./build/scripts'))
         .pipe(jsFilter.restore)
 
         // css
         .pipe(cssFilter)
         .pipe(less())
+        .pipe(concat('bower.css'))
+        .pipe(gulp.dest('./.tmp'))
+        .pipe(cssFilter.restore)
+
+        // images
+        .pipe(imageFilter)
+        .pipe(gulp.dest('./build/stylesheets/images'))
+});
+
+// handle bootstrap separately to facilitate bootstrap overrides
+// copy bootstrap mixins
+gulp.task('bootstrapMixins', ['bower'], function () {
+    return gulp.src('./bower_components/bootstrap/less/mixins/*.less')
+        .pipe(gulp.dest('./.tmp/bootstrap/mixins'));
+});
+
+// copy bootstrap less files
+gulp.task('bootstrap', ['bootstrapMixins'], function () {
+    return gulp.src('./bower_components/bootstrap/less/*.less')
+        .pipe(gulp.dest('./.tmp/bootstrap'));
+});
+
+// concat bootstrap variables and custom bootstrap override variables
+gulp.task('bootstrapVariables', ['bootstrap'], function () {
+    return gulp.src(['./bower_components/bootstrap/less/variables.less','./app/less/variables/bootstrap-overrides.less'])
+        .pipe(concat('variables.less'))
+        .pipe(gulp.dest('./.tmp/bootstrap'));
+});
+
+// compile bootstrap less
+gulp.task('compileBootstrap', ['bootstrapVariables'], function () {
+    return gulp.src('./.tmp/bootstrap/bootstrap.less')
+        .pipe(less())
+        .pipe(gulp.dest('./.tmp'))
+});
+
+// concat bootstrap and other bower css
+gulp.task('vendor', ['compileBootstrap'], function () {
+    return gulp.src('./.tmp/*.css')
         .pipe(concat('vendor.css'))
         .pipe(gulp.dest('./build/stylesheets'));
 });
@@ -57,8 +105,10 @@ gulp.task('vendor-build', ['vendor', 'vendor-fonts']);
 // app
 var appJs = function () {
     return gulp.src(paths.scripts)
+        .pipe(sourcemaps.init())
         .pipe(concat('app.js'))
         .pipe(ngAnnotate({ single_quotes: true }))
+        .pipe(sourcemaps.write())
         .pipe(connect.reload())
         .pipe(gulp.dest('./build/scripts'));
 };
@@ -75,8 +125,10 @@ gulp.task('app-html-watch', appHtml);
 
 var appCss = function () {
     return gulp.src(paths.styles)
+        .pipe(sourcemaps.init())
         .pipe(less())
         .pipe(concat('app.css'))
+        .pipe(sourcemaps.write())
         .pipe(connect.reload())
         .pipe(gulp.dest('./build/stylesheets'));
 };
@@ -142,13 +194,13 @@ gulp.task('watch', ['connect'], function () {
 });
 
 // build
-gulp.task('build', ['vendor-build', 'app-build', 'lint'], function () {
+gulp.task('build', ['vendor-build', 'clean-tmp', 'app-build', 'lint'], function () {
     return gulp.src('app/index.html')
         .pipe(gulp.dest('build'));
 });
 
-// deploy
-gulp.task('deploy', ['build'], function () {
+// dist
+gulp.task('dist', ['build', 'uglify'], function () {
     del(['./dist/**/*']).then(function () {
         return gulp.src('./build/**/*')
             .pipe(gulp.dest('dist'));
