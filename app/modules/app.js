@@ -8,12 +8,24 @@
         'ngRoute'
     ]);
 
-    var getWpData = function () {
-        var initInjector = angular.injector(['ng']),
-            $http = initInjector.get('$http');
+    var initInjector = angular.injector(['ng']),
+        $http = initInjector.get('$http');
 
-        return $http.get('http://daytonave.org/api/get_posts/?count=100&post_type=page').then(function (result) {
+    var getWpData = function () {
+        return $http.get('http://daytonave.org/wp-json/wp/v2/pages?per_page=100').then(function (result) {
             angular.module('ngWordpress').constant('wpData', result.data);
+            getWpMenu();
+        });
+    };
+
+    var getWpMenu = function () {
+        return $http.get('http://daytonave.org/wp-json/wp-api-menus/v2/menus').then(function (result) {
+            var mainMenu = window._.findWhere(result.data, { slug: 'main-menu' });
+            if (mainMenu) {
+                return $http.get('http://daytonave.org/wp-json/wp-api-menus/v2/menus/' + mainMenu.ID).then(function (result) {
+                    angular.module('ngWordpress').constant('wpMenu', result.data);
+                });
+            }
         });
     };
 
@@ -23,18 +35,18 @@
         });
     };
 
-    getWpData().then(bootstrapApplication);
+    getWpData()
+        .then(getWpMenu)
+        .then(bootstrapApplication);
 
     app.config(function ($routeProvider) {
         $routeProvider
-            .when('/', {
-                controller: 'homeController',
-                templateUrl: 'modules/pages/home/homeTemplate.html'
-            })
-            .otherwise({
-                redirectTo: '/'
+            .when('/:page*', {
+                controller: 'pageController',
+                templateUrl: 'modules/pageTemplate.html'
             });
     })
     .value('moment', window.moment)
-    .value('_', window._);
+    .value('_', window._)
+    .value('replace_all_rel_by_abs', window.replace_all_rel_by_abs);
 }());
