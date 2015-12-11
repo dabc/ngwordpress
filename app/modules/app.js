@@ -14,7 +14,6 @@
     var getWpData = function () {
         return $http.get('http://daytonave.org/wp-json/wp/v2/pages?per_page=100').then(function (result) {
             angular.module('ngWordpress').constant('wpData', result.data);
-            getWpMenu();
         });
     };
 
@@ -22,7 +21,7 @@
         return $http.get('http://daytonave.org/wp-json/wp-api-menus/v2/menus').then(function (result) {
             var mainMenu = window._.findWhere(result.data, { slug: 'main-menu' });
             if (mainMenu) {
-                return $http.get('http://daytonave.org/wp-json/wp-api-menus/v2/menus/' + mainMenu.ID).then(function (result) {
+                $http.get('http://daytonave.org/wp-json/wp-api-menus/v2/menus/' + mainMenu.ID).then(function (result) {
                     angular.module('ngWordpress').constant('wpMenu', result.data);
                 });
             }
@@ -42,6 +41,10 @@
     app.config(function ($routeProvider) {
         $routeProvider
             .when('/:page*', {
+                controller: 'pageController',
+                templateUrl: 'modules/pageTemplate.html'
+            })
+            .when('/', {
                 controller: 'pageController',
                 templateUrl: 'modules/pageTemplate.html'
             });

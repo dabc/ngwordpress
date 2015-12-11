@@ -2,13 +2,21 @@
     'use strict';
 
     angular.module('ngWordpress').controller('pageController', function ($scope, $routeParams, wpData, Page, _) {
-        var data = wpData,
-            route = $routeParams.page.replace(/\/?$/, '/'); // add trailing slash if not present
+        var page = {};
 
-        var page = _.find(data, function (d) {
-            var link = d.link.replace(/^(?:\/\/|[^\/]+)*\//, '');
-            return link === route;
-        });
+        if ($routeParams.page) {
+            var route = $routeParams.page.replace(/\/?$/, '/'); // add trailing slash if not present
+
+            page = _.find(wpData, function (d) {
+                var link = d.link.replace(/^(?:\/\/|[^\/]+)*\//, ''); // get link url starting after domain name
+                return link === route;
+            });
+        } else {
+            // user requested home route
+            page = _.find(wpData, function (d) {
+                return d.title.rendered === 'Home';
+            });
+        }
 
         $scope.page = Page.transformer(page);
 
