@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('ngWordpress').controller('pageController', function ($scope, $routeParams, wpData, Page, _) {
+    angular.module('ngwordpress').controller('pageController', function ($scope, $routeParams, wpData, Page, _) {
         var page = {};
 
         if ($routeParams.page) {

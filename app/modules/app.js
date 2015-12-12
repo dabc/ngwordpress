@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    var app = angular.module('ngWordpress', [
+    var app = angular.module('ngwordpress', [
         'ngCookies',
         'ngResource',
         'ngSanitize',
@@ -14,14 +14,14 @@
         protocol = 'http:',
         wpUrl = protocol + '//' + hostName;
 
-    angular.module('ngWordpress').constant('wpConfig', {
+    angular.module('ngwordpress').constant('wpConfig', {
         hostName: hostName,
         protocol: protocol
     });
 
     var getWpData = function () {
         return $http.get(wpUrl + '/wp-json/wp/v2/pages?per_page=100').then(function (result) {
-            angular.module('ngWordpress').constant('wpData', result.data);
+            angular.module('ngwordpress').constant('wpData', result.data);
         });
     };
 
@@ -30,7 +30,7 @@
             var mainMenu = window._.findWhere(result.data, { slug: 'main-menu' });
             if (mainMenu) {
                 $http.get(wpUrl + '/wp-json/wp-api-menus/v2/menus/' + mainMenu.ID).then(function (result) {
-                    angular.module('ngWordpress').constant('wpMenu', result.data);
+                    angular.module('ngwordpress').constant('wpMenu', result.data);
                 });
             }
         });
@@ -38,7 +38,7 @@
 
     var bootstrapApplication = function () {
         angular.element(document).ready(function() {
-            angular.bootstrap(document, ['ngWordpress']);
+            angular.bootstrap(document, ['ngwordpress']);
         });
     };
 
