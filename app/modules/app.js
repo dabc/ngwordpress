@@ -9,19 +9,27 @@
     ]);
 
     var initInjector = angular.injector(['ng']),
-        $http = initInjector.get('$http');
+        $http = initInjector.get('$http'),
+        hostName = 'my-wordpress-site.com',
+        protocol = 'http:',
+        wpUrl = protocol + '//' + hostName;
+
+    angular.module('ngWordpress').constant('wpConfig', {
+        hostName: hostName,
+        protocol: protocol
+    });
 
     var getWpData = function () {
-        return $http.get('http://daytonave.org/wp-json/wp/v2/pages?per_page=100').then(function (result) {
+        return $http.get(wpUrl + '/wp-json/wp/v2/pages?per_page=100').then(function (result) {
             angular.module('ngWordpress').constant('wpData', result.data);
         });
     };
 
     var getWpMenu = function () {
-        return $http.get('http://daytonave.org/wp-json/wp-api-menus/v2/menus').then(function (result) {
+        return $http.get(wpUrl + '/wp-json/wp-api-menus/v2/menus').then(function (result) {
             var mainMenu = window._.findWhere(result.data, { slug: 'main-menu' });
             if (mainMenu) {
-                $http.get('http://daytonave.org/wp-json/wp-api-menus/v2/menus/' + mainMenu.ID).then(function (result) {
+                $http.get(wpUrl + '/wp-json/wp-api-menus/v2/menus/' + mainMenu.ID).then(function (result) {
                     angular.module('ngWordpress').constant('wpMenu', result.data);
                 });
             }
