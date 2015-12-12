@@ -10,7 +10,7 @@
 
     var initInjector = angular.injector(['ng']),
         $http = initInjector.get('$http'),
-        hostName = 'my-wordpress-site.com',
+        hostName = 'daytonave.org',
         protocol = 'http:',
         wpUrl = protocol + '//' + hostName;
 

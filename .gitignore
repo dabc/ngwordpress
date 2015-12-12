@@ -5,5 +5,9 @@ bower_components
 # Editor files
 .idea
 
+# System files
+.DS_Store
+
 # Build and dist directories
 build
+dist
