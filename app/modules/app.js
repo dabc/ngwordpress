@@ -29,7 +29,7 @@
         return $http.get(wpUrl + '/wp-json/wp-api-menus/v2/menus').then(function (result) {
             var mainMenu = window._.findWhere(result.data, { slug: 'main-menu' });
             if (mainMenu) {
-                $http.get(wpUrl + '/wp-json/wp-api-menus/v2/menus/' + mainMenu.ID).then(function (result) {
+                return $http.get(wpUrl + '/wp-json/wp-api-menus/v2/menus/' + mainMenu.ID).then(function (result) {
                     angular.module('ngwordpress').constant('wpMenu', result.data);
                 });
             }
