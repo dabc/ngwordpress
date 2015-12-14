@@ -5,7 +5,8 @@
         'ngCookies',
         'ngResource',
         'ngSanitize',
-        'ngRoute'
+        'ngRoute',
+        'blockUI'
     ]);
 
     var initInjector = angular.injector(['ng']),
@@ -19,9 +20,21 @@
         protocol: protocol
     });
 
-    var getWpData = function () {
-        return $http.get(wpUrl + '/wp-json/wp/v2/pages?per_page=100').then(function (result) {
-            angular.module('ngwordpress').constant('wpData', result.data);
+    var getWpPages = function () {
+        return $http.get(wpUrl + '/wp-json/wp/v2/pages?per_page=500').then(function (result) {
+            angular.module('ngwordpress').constant('wpPages', result.data);
+        });
+    };
+
+    var getWpPosts = function () {
+        return $http.get(wpUrl + '/wp-json/wp/v2/posts?per_page=500').then(function (result) {
+            angular.module('ngwordpress').constant('wpPosts', result.data);
+        });
+    };
+
+    var getWpMedia = function () {
+        return $http.get(wpUrl + '/wp-json/wp/v2/media').then(function (result) {
+            angular.module('ngwordpress').constant('wpMedia', result.data);
         });
     };
 
@@ -42,7 +55,9 @@
         });
     };
 
-    getWpData()
+    getWpPages()
+        .then(getWpPosts)
+        .then(getWpMedia)
         .then(getWpMenu)
         .then(bootstrapApplication);
 
