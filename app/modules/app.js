@@ -11,7 +11,7 @@
 
     var initInjector = angular.injector(['ng']),
         $http = initInjector.get('$http'),
-        hostName = 'daytonave.org',
+        hostName = '192.168.99.100:8080',
         protocol = 'http:',
         wpUrl = protocol + '//' + hostName;
 

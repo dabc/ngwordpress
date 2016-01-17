@@ -10,7 +10,10 @@ var gulp = require('gulp'),
     uglify = require('gulp-uglify'),
     minifyCss = require('gulp-minify-css'),
     gulpFilter = require('gulp-filter'),
-    ngAnnotate = require('gulp-ng-annotate');
+    ngAnnotate = require('gulp-ng-annotate'),
+    tar = require('gulp-tar'),
+    gzip = require('gulp-gzip'),
+    p = require('./package.json');
 
 var paths = {
     styles: ['./app/less/**/*.less','!./app/less/variables/bootstrap-overrides.less'],
@@ -22,13 +25,8 @@ var paths = {
 // clean
 gulp.task('clean', function () {
     return del([
-        './build/**/*'
-    ]);
-});
-
-gulp.task('clean-tmp', ['vendor-build'], function () {
-    return del([
-        './.tmp'
+        './build/**/*',
+        './dist/**/*'
     ]);
 });
 
@@ -95,12 +93,22 @@ gulp.task('vendor', ['compileBootstrap'], function () {
 
 // vendor fonts
 gulp.task('fontawesome', ['clean'], function () {
-    return gulp.src('./bower_components/fontawesome/fonts/**/*.{ttf,woff,woff2,eof,svg}')
+    return gulp.src('./bower_components/fontawesome/fonts/**/*.{otf,eot,woff,woff2,svg,ttf}')
         .pipe(gulp.dest('./build/fonts'));
 });
-gulp.task('vendor-fonts', ['fontawesome']);
 
-gulp.task('vendor-build', ['vendor', 'vendor-fonts']);
+gulp.task('glyphicons', ['clean'], function () {
+    return gulp.src('./bower_components/bootstrap/fonts/**/*.{otf,eot,woff,woff2,svg,ttf}')
+        .pipe(gulp.dest('./build/fonts'));
+});
+
+gulp.task('vendor-fonts', ['fontawesome','glyphicons']);
+
+gulp.task('vendor-build', ['vendor', 'vendor-fonts'], function () {
+    return del([
+        './.tmp'
+    ]);
+});
 
 // app
 var appJs = function () {
@@ -145,30 +153,6 @@ gulp.task('lint', function () {
         .pipe(jshint.reporter('fail'));
 });
 
-// uglify
-gulp.task('uglify-vendor-js', ['build'], function () {
-    gulp.src('./build/scripts/vendor.js')
-        .pipe(uglify())
-        .pipe(gulp.dest('./build/scripts'));
-});
-
-gulp.task('uglify-app-js', ['build'], function () {
-    gulp.src('./build/scripts/app.js')
-        .pipe(sourcemaps.init())
-        .pipe(uglify())
-        .pipe(sourcemaps.write())
-        .pipe(gulp.dest('./build/scripts'));
-});
-
-gulp.task('uglify-app-css', ['build'], function () {
-    gulp.src('./build/stylesheets/style.css')
-        .pipe(sourcemaps.init())
-        .pipe(minifyCss())
-        .pipe(sourcemaps.write())
-        .pipe(gulp.dest('./build/stylesheets'));
-});
-gulp.task('uglify', ['uglify-vendor-js', 'uglify-app-js', 'uglify-app-css']);
-
 // tests
 gulp.task('test', function (done) {
     karma.start({
@@ -194,17 +178,52 @@ gulp.task('watch', ['connect'], function () {
 });
 
 // build
-gulp.task('build', ['vendor-build', 'clean-tmp', 'app-build', 'lint'], function () {
+gulp.task('build', ['vendor-build', 'app-build', 'lint'], function () {
     return gulp.src('app/index.html')
         .pipe(gulp.dest('build'));
 });
 
-// dist
-gulp.task('dist', ['build', 'uglify'], function () {
-    del(['./dist/**/*']).then(function () {
-        return gulp.src('./build/**/*')
-            .pipe(gulp.dest('dist'));
-    });
+// copy build files to dist
+gulp.task('dist-copy', ['build'], function () {
+    return gulp.src('./build/**/*')
+        .pipe(gulp.dest('dist'));
+});
+
+// uglify dist files
+gulp.task('uglify-vendor-js', ['dist-copy'], function () {
+    gulp.src('./dist/scripts/vendor.js')
+        .pipe(uglify())
+        .pipe(gulp.dest('./dist/scripts'));
+});
+
+gulp.task('uglify-app-js', ['dist-copy'], function () {
+    gulp.src('./dist/scripts/app.js')
+        .pipe(uglify())
+        .pipe(gulp.dest('./dist/scripts'));
+});
+
+gulp.task('uglify-app-css', ['dist-copy'], function () {
+    gulp.src('./dist/stylesheets/*.css')
+        .pipe(minifyCss())
+        .pipe(gulp.dest('./dist/stylesheets'));
+});
+
+// main dist task
+gulp.task('dist', ['uglify-vendor-js', 'uglify-app-js', 'uglify-app-css']);
+
+// deploy
+gulp.task('deploy-ngwordpress', ['dist'], function () {
+    return gulp.src('./dist/**/*')
+        .pipe(gulp.dest('./ngwordpress')) // this will be the name of the directory inside the archive
+        .pipe(tar('ngwordpress' + p.version + '.tar'))
+        .pipe(gzip())
+        .pipe(gulp.dest('./deploy'));
+});
+
+gulp.task('deploy', ['deploy-ngwordpress'], function () {
+    return del([
+        './ngwordpress'
+    ]);
 });
 
 // default gulp task
