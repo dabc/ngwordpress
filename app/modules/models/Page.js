@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('ngwordpress').factory('Page', function (wpConfig, moment, replace_all_rel_by_abs) {
+    angular.module('ngwordpress').factory('Page', function (wpConfig, moment, $, _) {
         var Page = function (_links, author, comment_status, content, date, date_gmt, excerpt, featured_image, guid, id, link, menu_order, modified, modified_gmt, parent, ping_status, slug, template, title, type) {
             this._links = _links;
             this.author = author;
@@ -27,7 +27,30 @@
 
         Page.prototype = {
             formatHtml: function () {
-                return replace_all_rel_by_abs(this.content.rendered, this.link, wpConfig.hostName, wpConfig.protocol);
+                var content = $(this.content.rendered),
+                    absLinks = content.find('a[href*="' + wpConfig.hostName + '"]'),
+                    relLinks = content.find('a[href^="/"]'),
+                    returnStr = '';
+
+                _.forEach(absLinks, function (l) {
+                    if (l.pathname.split('.').length === 1) {
+                        l.href = '/#' + l.pathname;
+                    }
+                });
+
+                _.forEach(relLinks, function (l) {
+                    if (l.pathname.split('.').length === 1) {
+                        l.href = '/#' + l.pathname;
+                    }
+                });
+
+                _.forEach(content, function (c) {
+                    if (c.outerHTML) {
+                        returnStr += c.outerHTML;
+                    }
+                });
+
+                return returnStr;
             }
         };
 
@@ -69,4 +92,4 @@
 
         return Page;
     });
-}());
+})();

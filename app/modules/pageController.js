@@ -18,7 +18,8 @@
             });
         }
 
-        $scope.page = Page.transformer(page);
+        page = Page.transformer(page);
+        $scope.pageHtml = page.formatHtml();
 
         var initialize = function () {
 
@@ -26,4 +27,4 @@
 
         initialize();
     });
-}());
+})();

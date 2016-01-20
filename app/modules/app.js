@@ -74,5 +74,5 @@
     })
     .value('moment', window.moment)
     .value('_', window._)
-    .value('replace_all_rel_by_abs', window.replace_all_rel_by_abs);
-}());
+    .value('$', window.$);
+})();

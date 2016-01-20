@@ -8,4 +8,4 @@
             return url.replace(/^(?:\/\/|[^\/]+)*\//, ''); // get link url starting after domain name
         };
     });
-}());
+})();
