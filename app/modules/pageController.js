@@ -27,12 +27,7 @@
         }
 
         page = Page.transformer(page);
+        $scope.page = page;
         $scope.pageHtml = page.formatHtml();
-
-        var initialize = function () {
-
-        };
-
-        initialize();
     });
 })();
