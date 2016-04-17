@@ -19,7 +19,8 @@ var paths = {
     styles: ['./app/less/**/*.less','!./app/less/variables/bootstrap-overrides.less'],
     scripts: ['./app/modules/**/*.js', './app/scripts/**/*.js'],
     html: ['./app/modules/**/*.html'],
-    tests: ['./tests/*.js']
+    tests: ['./tests/*.js'],
+    config: ['./config/*.json']
 };
 
 // clean
@@ -123,6 +124,12 @@ var appJs = function () {
 gulp.task('app-js', ['clean'], appJs);
 gulp.task('app-js-watch', appJs);
 
+var appConfig = function () {
+    return gulp.src(paths.config)
+        .pipe(gulp.dest('./build/config'));
+};
+gulp.task('app-config', ['clean'], appConfig);
+
 var appHtml = function () {
     return gulp.src(paths.html)
         .pipe(connect.reload())
@@ -143,7 +150,7 @@ var appCss = function () {
 gulp.task('app-css', ['clean'], appCss);
 gulp.task('app-css-watch', appCss);
 
-gulp.task('app-build', ['app-js', 'app-html', 'app-css']);
+gulp.task('app-build', ['app-js', 'app-config', 'app-html', 'app-css']);
 
 // code linting
 gulp.task('lint', function () {
@@ -227,4 +234,4 @@ gulp.task('deploy', ['deploy-ngwordpress'], function () {
 });
 
 // default gulp task
-gulp.task('default', ['build', 'connect', 'watch']);
+gulp.task('default', ['watch']);
