@@ -30,18 +30,23 @@
                 var content = $(this.content.rendered),
                     absLinks = content.find('a[href*="' + wpConfig.hostName + '"]'),
                     relLinks = content.find('a[href^="/"]'),
+                    relPaths = content.find('img[src^="/"]'),
                     returnStr = '';
 
                 _.forEach(absLinks, function (l) {
                     if (l.pathname.split('.').length === 1) {
-                        l.href = '/#' + l.pathname;
+                        l.href = '/#!' + l.pathname;
                     }
                 });
 
                 _.forEach(relLinks, function (l) {
                     if (l.pathname.split('.').length === 1) {
-                        l.href = '/#' + l.pathname;
+                        l.href = '/#!' + l.pathname;
                     }
+                });
+
+                _.forEach(relPaths, function (p) {
+                    p.src = wpConfig.protocol + '//' + wpConfig.hostName + p.attributes.src.value;
                 });
 
                 _.forEach(content, function (c) {

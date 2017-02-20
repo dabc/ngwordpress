@@ -5,7 +5,7 @@
         $scope.links = wpMenu.items;
 
         $scope.formatUrl = function (url) {
-            return url.replace(/^(?:\/\/|[^\/]+)*\//, ''); // get link url starting after domain name
+            return '/#!/' + url.replace(/^(?:\/\/|[^\/]+)*\//, ''); // get link url starting after domain name
         };
     });
 })();

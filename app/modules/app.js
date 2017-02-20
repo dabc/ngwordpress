@@ -40,7 +40,7 @@
 
     var getWpMenu = function () {
         return $http.get(wpUrl + '/wp-json/wp-api-menus/v2/menus').then(function (response) {
-            var mainMenu = window._.findWhere(response.data, { slug: 'main-menu' });
+            var mainMenu = window._.find(response.data, { slug: 'main-menu' });
             if (mainMenu) {
                 return $http.get(wpUrl + '/wp-json/wp-api-menus/v2/menus/' + mainMenu.ID).then(function (response) {
                     angular.module('ngwordpress').constant('wpMenu', response.data);

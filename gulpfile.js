@@ -4,22 +4,18 @@ var gulp = require('gulp'),
     mainBowerFiles = require('main-bower-files'),
     less = require('gulp-less'),
     jshint = require('gulp-jshint'),
-    karma = require('karma').server,
     sourcemaps = require('gulp-sourcemaps'),
     del = require('del'),
     uglify = require('gulp-uglify'),
-    minifyCss = require('gulp-minify-css'),
+    cssnano = require('gulp-cssnano'),
     gulpFilter = require('gulp-filter'),
     ngAnnotate = require('gulp-ng-annotate'),
-    tar = require('gulp-tar'),
-    gzip = require('gulp-gzip'),
     p = require('./package.json');
 
 var paths = {
     styles: ['./app/less/**/*.less','!./app/less/variables/bootstrap-overrides.less'],
     scripts: ['./app/modules/**/*.js', './app/scripts/**/*.js'],
     html: ['./app/modules/**/*.html'],
-    tests: ['./tests/*.js'],
     config: ['./config/*.json']
 };
 
@@ -155,17 +151,8 @@ gulp.task('app-build', ['app-js', 'app-config', 'app-html', 'app-css']);
 // code linting
 gulp.task('lint', function () {
     return gulp.src(paths.scripts)
-        .pipe(jshint({ devel: true, debug: true }))
-        .pipe(jshint.reporter('jshint-stylish'))
-        .pipe(jshint.reporter('fail'));
-});
-
-// tests
-gulp.task('test', function (done) {
-    karma.start({
-        configFile: 'karma.conf.js',
-        singleRun: true
-    }, done);
+        .pipe(jshint())
+        .pipe(jshint.reporter('jshint-stylish'));
 });
 
 // dev server
@@ -211,21 +198,12 @@ gulp.task('uglify-app-js', ['dist-copy'], function () {
 
 gulp.task('uglify-app-css', ['dist-copy'], function () {
     gulp.src('./dist/stylesheets/*.css')
-        .pipe(minifyCss())
+        .pipe(cssnano())
         .pipe(gulp.dest('./dist/stylesheets'));
 });
 
 // main dist task
 gulp.task('dist', ['uglify-vendor-js', 'uglify-app-js', 'uglify-app-css']);
-
-// deploy
-gulp.task('deploy-ngwordpress', ['dist'], function () {
-    return gulp.src('./dist/**/*')
-        .pipe(gulp.dest('./ngwordpress')) // this will be the name of the directory inside the archive
-        .pipe(tar('ngwordpress' + p.version + '.tar'))
-        .pipe(gzip())
-        .pipe(gulp.dest('./deploy'));
-});
 
 gulp.task('deploy', ['deploy-ngwordpress'], function () {
     return del([
