@@ -8,9 +8,9 @@
     "angular-resource": "*",
     "angular-route": "*",
     "angular-sanitize": "*",
-    "bootstrap": "*",
     "lodash": "*",
-    "moment": "*"
+    "moment": "*",
+    "jquery": "^3.1.1"
   },
   "dev-dependencies": {}
 }
